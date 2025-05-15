@@ -1,3 +1,10 @@
-spring.application.name=Bookstore
-
-
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/bookstore
+    username: postgres
+    password: password
+  flyway:
+    url: jdbc:postgresql://localhost:5432/bookstore
+    user: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
