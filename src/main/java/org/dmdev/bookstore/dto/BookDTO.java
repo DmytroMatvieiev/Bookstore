@@ -1,10 +1,9 @@
 package org.dmdev.bookstore.dtos;
 
 import lombok.Builder;
-import org.dmdev.bookstore.entities.Author;
+import org.dmdev.bookstore.domain.Author;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Builder

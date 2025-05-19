@@ -1,7 +1,7 @@
 package org.dmdev.bookstore.dtos;
 
 import lombok.Builder;
-import org.dmdev.bookstore.entities.Book;
+import org.dmdev.bookstore.domain.Book;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.dmdev.bookstore.entities;
+package org.dmdev.bookstore.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
