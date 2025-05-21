@@ -1,17 +1,7 @@
 package org.dmdev.bookstore;
 
-import org.dmdev.bookstore.dtos.AuthorDTO;
-import org.dmdev.bookstore.entities.Author;
-import org.dmdev.bookstore.entities.Book;
-import org.dmdev.bookstore.services.AuthorService;
-import org.dmdev.bookstore.services.BookService;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import reactor.core.publisher.Flux;
-
-import java.time.LocalDate;
 
 @SpringBootApplication
 public class BookstoreApplication {
@@ -20,30 +10,37 @@ public class BookstoreApplication {
         SpringApplication.run(BookstoreApplication.class, args);
     }
 
-    @Bean
+/*    @Bean
     public CommandLineRunner demo(BookService bookService, AuthorService authorService) {
         return args -> {
-            Flux<AuthorDTO> authorFlux = Flux.range(0, 3)
+*//*            Flux.range(0, 5)
                     .map(i -> Author.builder()
                             .firstname("firstname" + i)
                             .lastname("lastname" + i)
-                            .birthdate(LocalDate.now())
+                            .birthdate(LocalDate.of(2000,i+1,1))
                             .build())
                     .flatMap(authorService::save)
-                    .cache();
+                    .subscribe();*//*
+            List<UUID> authorIds = List.of(UUID.fromString("7216ec30-9c25-4f98-8335-cfcf258e27d1"),
+                    UUID.fromString("36a59290-9ee9-4cec-a595-e4836753cdad"),
+                    UUID.fromString("2530cc11-4bd5-4401-ad24-fceee55b6160"),
+                    UUID.fromString("5454904e-6aad-4a75-9129-daa45aa8720f"),
+                    UUID.fromString("5dbb5071-5c4e-4fe1-a108-813301533cdc"));
 
-            authorFlux.collectList().flatMapMany(authors -> {
-                return Flux.range(0, 10)
-                        .map(i -> {
-                            AuthorDTO randomAuthor = authors.get(i % authors.size()); // Cycle through authors
-                            return Book.builder()
-                                    .title("book " + i)
-                                    .ISBN("ISBN " + i)
-                                    .author(randomAuthor.id())
-                                    .build();
-                        })
-                        .flatMap(bookService::save);
-            }).subscribe();
+            Flux.range(0, 50)
+                    .map(i -> {
+                        UUID randomAuthor = authorIds.get(i % authorIds.size()); // Cycle through authors
+                        return Book.builder()
+                                .title("book " + i)
+                                .ISBN("ISBN " + i)
+                                .author(randomAuthor)
+                                .pages(i+130)
+                                .publicationDate(LocalDate.of(2000 + (i%12)%4,(i%12)%6+1,i%27+1))
+                                .build();
+                    })
+                    .flatMap(bookService::save)
+                    .subscribe();
         };
-    }
+    }*/
 }
+

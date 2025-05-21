@@ -1,4 +1,4 @@
-package org.dmdev.bookstore.repositories;
+package org.dmdev.bookstore.repository;
 
 import org.dmdev.bookstore.domain.Book;
 import org.springframework.data.r2dbc.repository.Query;

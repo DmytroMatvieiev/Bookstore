@@ -1,4 +1,4 @@
-package org.dmdev.bookstore.repositories;
+package org.dmdev.bookstore.repository;
 
 import org.dmdev.bookstore.domain.Author;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;

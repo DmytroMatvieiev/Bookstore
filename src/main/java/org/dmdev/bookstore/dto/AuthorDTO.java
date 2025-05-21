@@ -1,4 +1,4 @@
-package org.dmdev.bookstore.dtos;
+package org.dmdev.bookstore.dto;
 
 import lombok.Builder;
 import org.dmdev.bookstore.domain.Book;

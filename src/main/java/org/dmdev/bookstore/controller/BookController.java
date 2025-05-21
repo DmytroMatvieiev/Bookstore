@@ -1,8 +1,8 @@
-package org.dmdev.bookstore.controllers;
+package org.dmdev.bookstore.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.dmdev.bookstore.models.ResponseModel;
-import org.dmdev.bookstore.services.BookService;
+import org.dmdev.bookstore.model.ResponseModel;
+import org.dmdev.bookstore.service.BookService;
 import org.dmdev.bookstore.domain.Book;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;

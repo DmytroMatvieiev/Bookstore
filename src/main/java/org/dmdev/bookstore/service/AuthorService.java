@@ -1,11 +1,11 @@
-package org.dmdev.bookstore.services;
+package org.dmdev.bookstore.service;
 
 import lombok.RequiredArgsConstructor;
-import org.dmdev.bookstore.dtos.AuthorDTO;
+import org.dmdev.bookstore.dto.AuthorDTO;
 import org.dmdev.bookstore.domain.Author;
-import org.dmdev.bookstore.models.ResponseModel;
-import org.dmdev.bookstore.repositories.AuthorRepository;
-import org.dmdev.bookstore.repositories.BookRepository;
+import org.dmdev.bookstore.model.ResponseModel;
+import org.dmdev.bookstore.repository.AuthorRepository;
+import org.dmdev.bookstore.repository.BookRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 

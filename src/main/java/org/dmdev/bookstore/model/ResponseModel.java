@@ -1,4 +1,4 @@
-package org.dmdev.bookstore.models;
+package org.dmdev.bookstore.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
