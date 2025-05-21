@@ -48,11 +48,11 @@ public class SecurityService {
     private TokenDetails generateToken(Date expirationDate, Map<String, Object> claims, String subject) {
         Date createdDate = new Date();
         String token = Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setClaims(claims)
                 .setIssuer(issuer)
                 .setSubject(subject)
                 .setIssuedAt(createdDate)
-                .setId(UUID.randomUUID().toString())
                 .setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(secret.getBytes()))
                 .compact();

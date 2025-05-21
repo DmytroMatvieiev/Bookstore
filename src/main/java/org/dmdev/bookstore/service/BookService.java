@@ -3,6 +3,7 @@ package org.dmdev.bookstore.service;
 import lombok.RequiredArgsConstructor;
 import org.dmdev.bookstore.dto.BookDTO;
 import org.dmdev.bookstore.domain.Book;
+import org.dmdev.bookstore.mapper.BookMapper;
 import org.dmdev.bookstore.model.ResponseModel;
 import org.dmdev.bookstore.repository.AuthorRepository;
 import org.dmdev.bookstore.repository.BookRepository;
@@ -17,27 +18,20 @@ public class BookService {
 
     private final BookRepository repo;
     private final AuthorRepository authorRepository;
+    private final BookMapper mapper;
 
-    public Mono<ResponseModel> save(Book book) {
-        if (book.getUUID() != null) {
+    public Mono<ResponseModel> save(BookDTO bookDTO) {
+        if (bookDTO.id() != null) {
             return Mono.just(ResponseModel.builder()
                     .status(ResponseModel.FAIL_STATUS)
                     .message("Book already exists")
                     .build());
         } else {
-            return authorRepository.findById(book.getAuthor())
-                    .flatMap(author -> repo.save(book)
-                            .map(newBook -> BookDTO.builder()
-                                    .id(newBook.getUUID())
-                                    .title(newBook.getTitle())
-                                    .isbn(newBook.getISBN())
-                                    .publishedDate(newBook.getPublicationDate())
-                                    .pages(newBook.getPages())
-                                    .author(author)
-                                    .build()))
+            return authorRepository.findById(bookDTO.authorId())
+                    .flatMap(author -> repo.save(mapper.dtoToBook(bookDTO)))
                     .map(dto -> ResponseModel.builder()
                             .status(ResponseModel.SUCCESS_STATUS)
-                            .message(String.format("Book %s Created", dto.title()))
+                            .message(String.format("Book %s Created", bookDTO.title()))
                             .build())
                     .switchIfEmpty(Mono.just(ResponseModel.builder()
                             .status(ResponseModel.FAIL_STATUS)
@@ -45,7 +39,7 @@ public class BookService {
                             .build()))
                     .onErrorResume(ex -> Mono.just(ResponseModel.builder()
                             .status(ResponseModel.FAIL_STATUS)
-                            .message("Unexpected error: Iternal error")
+                            .message("Unexpected error: Iternal server error")
                             .build()));
         }
     }
@@ -64,24 +58,14 @@ public class BookService {
                         .build()))
                 .onErrorResume(ex -> Mono.just(ResponseModel.builder()
                         .status(ResponseModel.FAIL_STATUS)
-                        .message("Error: " + ex.getMessage())
+                        .message("Unexpected error: Iternal server error")
                         .build()));
     }
 
     public Mono<ResponseModel> findAll(int limit, int size) {
         int offset = limit * size;
         return repo.findAll(limit, offset)
-                .flatMap(book ->
-                        authorRepository.findById(book.getAuthor())
-                                .map(author -> BookDTO.builder()
-                                        .id(book.getUUID())
-                                        .title(book.getTitle())
-                                        .isbn(book.getISBN())
-                                        .publishedDate(book.getPublicationDate())
-                                        .pages(book.getPages())
-                                        .author(author)
-                                        .build())
-                )
+                .map(mapper::bookToDto)
                 .collectList()
                 .map(bookList -> ResponseModel.builder()
                         .status(ResponseModel.SUCCESS_STATUS)
@@ -98,15 +82,8 @@ public class BookService {
     public Mono<ResponseModel> findAllByAuthor(UUID authorId) {
         return authorRepository.findById(authorId)
                 .flatMap(author ->
-                        repo.findAllByAuthor(authorId)
-                                .map(book -> BookDTO.builder()
-                                        .id(book.getUUID())
-                                        .title(book.getTitle())
-                                        .isbn(book.getISBN())
-                                        .publishedDate(book.getPublicationDate())
-                                        .pages(book.getPages())
-                                        .author(author)
-                                        .build())
+                        repo.findAllByAuthorId(authorId)
+                                .map(mapper::bookToDto)
                                 .collectList()
                                 .map(bookList -> ResponseModel.builder()
                                         .status(ResponseModel.SUCCESS_STATUS)
@@ -127,16 +104,7 @@ public class BookService {
 
     public Mono<ResponseModel> findById(UUID id) {
         return repo.findById(id)
-                .flatMap(book -> authorRepository.findById(book.getAuthor())
-                        .map(author -> BookDTO.builder()
-                                .id(book.getUUID())
-                                .title(book.getTitle())
-                                .isbn(book.getISBN())
-                                .publishedDate(book.getPublicationDate())
-                                .pages(book.getPages())
-                                .author(author)
-                                .build())
-                )
+                .map(mapper::bookToDto)
                 .map(dto -> ResponseModel.builder()
                         .status(ResponseModel.SUCCESS_STATUS)
                         .message("Book retrieved successfully")

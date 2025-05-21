@@ -12,5 +12,5 @@ public record BookDTO(UUID id,
                       String isbn,
                       LocalDate publishedDate,
                       int pages,
-                      Author author) {
+                      UUID authorId) {
 }

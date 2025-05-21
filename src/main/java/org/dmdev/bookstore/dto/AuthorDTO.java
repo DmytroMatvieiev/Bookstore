@@ -12,6 +12,5 @@ public record AuthorDTO(UUID id,
                         String firstName,
                         String lastName,
                         LocalDate birthDate,
-                        LocalDate deathDate,
-                        List<Book> books) {
+                        LocalDate deathDate) {
 }

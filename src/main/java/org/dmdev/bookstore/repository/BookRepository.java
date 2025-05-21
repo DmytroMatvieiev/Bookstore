@@ -12,5 +12,5 @@ public interface BookRepository extends ReactiveCrudRepository<Book, UUID> {
     @Query("SELECT * FROM books ORDER BY publication_date ASC LIMIT :limit OFFSET :offset")
     Flux<Book> findAll(int limit, int offset);
 
-    Flux<Book> findAllByAuthor(UUID author);
+    Flux<Book> findAllByAuthorId(UUID author);
 }

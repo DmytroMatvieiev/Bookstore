@@ -3,6 +3,8 @@ package org.dmdev.bookstore.service;
 import lombok.RequiredArgsConstructor;
 import org.dmdev.bookstore.dto.AuthorDTO;
 import org.dmdev.bookstore.domain.Author;
+import org.dmdev.bookstore.mapper.AuthorMapper;
+import org.dmdev.bookstore.mapper.BookMapper;
 import org.dmdev.bookstore.model.ResponseModel;
 import org.dmdev.bookstore.repository.AuthorRepository;
 import org.dmdev.bookstore.repository.BookRepository;
@@ -15,16 +17,12 @@ public class AuthorService {
 
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
+    private final AuthorMapper authorMapper;
+    private final BookMapper bookMapper;
 
     public Mono<ResponseModel> findAll() {
         return authorRepository.findAll()
-                .map(author -> AuthorDTO.builder()
-                        .id(author.getId())
-                        .firstName(author.getFirstname())
-                        .lastName(author.getLastname())
-                        .birthDate(author.getBirthdate())
-                        .deathDate(author.getDateOfDeath())
-                        .build())
+                .map(authorMapper::authorToDto)
                 .collectList()
                 .map(authorList -> ResponseModel.builder()
                         .status(ResponseModel.SUCCESS_STATUS)
@@ -46,16 +44,9 @@ public class AuthorService {
                     .build());
         }
         return authorRepository.save(author)
-                .map(savedAuthor -> AuthorDTO.builder()
-                        .id(savedAuthor.getId())
-                        .firstName(savedAuthor.getFirstname())
-                        .lastName(savedAuthor.getLastname())
-                        .birthDate(savedAuthor.getBirthdate())
-                        .deathDate(savedAuthor.getDateOfDeath())
-                        .build())
                 .map(dto -> ResponseModel.builder()
                         .status(ResponseModel.SUCCESS_STATUS)
-                        .message(String.format("Author %s %s saved successfully", dto.firstName(), dto.lastName()))
+                        .message(String.format("Author %s %s saved successfully", author.getFirstname(), author.getLastname()))
                         .data(dto)
                         .build())
                 .onErrorResume(ex -> Mono.just(ResponseModel.builder()

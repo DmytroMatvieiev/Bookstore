@@ -18,7 +18,7 @@ import java.util.UUID;
 @Table(name = "books")
 public class Book {
     @Id
-    private UUID UUID;
+    private UUID id;
     @Column("isbn")
     private String ISBN;
     @Column("title")
@@ -27,6 +27,6 @@ public class Book {
     private int pages;
     @Column("publication_date")
     private LocalDate publicationDate;
-    @Column("author")
-    private UUID author;
+    @Column("author_id")
+    private UUID authorId;
 }

@@ -17,7 +17,7 @@ public class PBFDK2Encoder implements PasswordEncoder {
     private String secret;
     @Value("${jwt.password.encoder.iteration}")
     private Integer iteration;
-    @Value("${jwt.password.encoder.keylength}")
+    @Value("${jwt.password.encoder.keyLength}")
     private Integer keyLength;
 
     private static final String SECRET_KEY_INSTANCE = "PBKDF2WithHmacSHA512";

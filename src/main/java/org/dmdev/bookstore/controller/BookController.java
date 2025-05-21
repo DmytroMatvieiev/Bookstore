@@ -1,6 +1,7 @@
 package org.dmdev.bookstore.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.dmdev.bookstore.dto.BookDTO;
 import org.dmdev.bookstore.model.ResponseModel;
 import org.dmdev.bookstore.service.BookService;
 import org.dmdev.bookstore.domain.Book;
@@ -17,8 +18,8 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping
-    Mono<ResponseModel> save(@RequestBody Book book) {
-        return bookService.save(book);
+    Mono<ResponseModel> save(@RequestBody BookDTO bookDTO) {
+        return bookService.save(bookDTO);
     }
 
     @GetMapping
