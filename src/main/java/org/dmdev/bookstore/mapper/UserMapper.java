@@ -19,6 +19,9 @@ public class UserMapper {
                 .password(passwordEncoder.encode(dto.password()))
                 .email(dto.email())
                 .role(UserRole.ROLE_USER)
+                .verificationToken(dto.verificationToken())
+                .isVerified(dto.isVerified())
+                .resetToken(dto.resetToken())
                 .enabled(true)
                 .build();
     }
@@ -32,6 +35,9 @@ public class UserMapper {
                 .role(user.getRole())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
+                .verificationToken(user.getVerificationToken())
+                .isVerified(user.isVerified())
+                .resetToken(user.getResetToken())
                 .enabled(user.isEnabled())
                 .build();
     }

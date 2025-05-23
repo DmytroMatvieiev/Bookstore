@@ -4,16 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.dmdev.bookstore.domain.User;
 import org.dmdev.bookstore.exception.UnauthorizedException;
 import org.dmdev.bookstore.repository.UserRepository;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class AuthenticationManage implements ReactiveAuthenticationManager {
+public class AuthenticationManager implements ReactiveAuthenticationManager {
 
     private final UserRepository userRepository;
 

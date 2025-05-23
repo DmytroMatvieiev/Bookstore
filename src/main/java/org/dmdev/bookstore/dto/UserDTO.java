@@ -17,6 +17,9 @@ public record UserDTO(
         UserRole role,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
+        String verificationToken,
+        boolean isVerified,
+        String resetToken,
         boolean enabled
 ) {
 }

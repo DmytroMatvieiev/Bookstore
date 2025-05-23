@@ -1,4 +1,16 @@
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: bookstorenoreplay@gmail.com
+    password: qfyf ywza lprl ooik
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   r2dbc:
     url: r2dbc:postgresql://localhost:5432/bookstore
     username: postgres
@@ -16,6 +28,8 @@ jwt:
       iteration: 64
       keyLength: 256
   secret: b5f59337a612a2a7dc07328f3e7d1a04722967c7f06df20a499a7d3f91ff2a7e
+  emailSecret: email-token-secret-key-also-very-long-and-secure
+  emailExpiration: 86400000
   expiration: 3600
   issuer: proselyte
 

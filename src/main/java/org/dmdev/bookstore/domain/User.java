@@ -40,6 +40,12 @@ public class User implements UserDetails {
     @LastModifiedDate
     @Column("updated_at")
     private LocalDateTime updatedAt;
+    @Column("verification_token")
+    private String verificationToken;
+    @Column("is_verified")
+    private boolean isVerified;
+    @Column("reset_token")
+    private String resetToken;
     private boolean enabled;
 
 

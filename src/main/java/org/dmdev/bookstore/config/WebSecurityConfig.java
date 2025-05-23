@@ -1,7 +1,7 @@
 package org.dmdev.bookstore.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dmdev.bookstore.security.AuthenticationManage;
+import org.dmdev.bookstore.security.AuthenticationManager;
 import org.dmdev.bookstore.security.BearerTokenServerAuthenticationConverter;
 import org.dmdev.bookstore.security.JwtHandler;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,11 +29,11 @@ public class WebSecurityConfig {
     @Value("${jwt.secret}")
     private String secret;
 
-    private final String [] publicRoutes = {"/api/auth/register", "/api/auth/login"};
+    private final String [] publicRoutes = {"/api/auth/register", "/api/auth/login", "/api/verify"};
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
-                                                         AuthenticationManage authenticationManage,
+                                                         AuthenticationManager authenticationManager,
                                                          ServerAccessDeniedHandler accessDeniedHandler,
                                                          ServerAuthenticationEntryPoint authenticationEntryPoint) {
         return http
@@ -47,7 +47,7 @@ public class WebSecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS).permitAll()
                         .anyExchange().authenticated()
                 )
-                .addFilterAt(bearerAuthenticationWebFilter(authenticationManage), SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterAt(bearerAuthenticationWebFilter(authenticationManager), SecurityWebFiltersOrder.AUTHENTICATION)
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }
@@ -70,8 +70,8 @@ public class WebSecurityConfig {
         };
     }
 
-    private AuthenticationWebFilter bearerAuthenticationWebFilter(AuthenticationManage authenticationManage) {
-        AuthenticationWebFilter bearerAuthenticationWebFilter = new AuthenticationWebFilter(authenticationManage);
+    private AuthenticationWebFilter bearerAuthenticationWebFilter(AuthenticationManager authenticationManager) {
+        AuthenticationWebFilter bearerAuthenticationWebFilter = new AuthenticationWebFilter(authenticationManager);
         bearerAuthenticationWebFilter.setServerAuthenticationConverter(new BearerTokenServerAuthenticationConverter(new JwtHandler(secret)));
         bearerAuthenticationWebFilter.setRequiresAuthenticationMatcher(ServerWebExchangeMatchers.pathMatchers("/**"));
         return bearerAuthenticationWebFilter;
