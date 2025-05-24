@@ -4,6 +4,7 @@ import lombok.Builder;
 import org.dmdev.bookstore.domain.Author;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -12,5 +13,6 @@ public record BookDTO(UUID id,
                       String isbn,
                       LocalDate publishedDate,
                       int pages,
-                      UUID authorId) {
+                      UUID authorId,
+                      List<GenreDTO> genres) {
 }

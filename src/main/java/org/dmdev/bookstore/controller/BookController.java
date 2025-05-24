@@ -8,6 +8,7 @@ import org.dmdev.bookstore.domain.Book;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -38,5 +39,10 @@ public class BookController {
     @GetMapping("/{id}")
     Mono<ResponseModel> findById(@PathVariable UUID id) {
         return bookService.findById(id);
+    }
+
+    @GetMapping("/by-genres")
+    public Mono<ResponseModel> findBooksByGenres(@RequestParam List<UUID> genreIds) {
+        return bookService.findBooksByGenres(genreIds);
     }
 }
