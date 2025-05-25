@@ -2,6 +2,7 @@ package org.dmdev.bookstore.security.verification;
 
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class EmailService {
@@ -52,8 +54,9 @@ public class EmailService {
                 helper.setFrom(from);
                 helper.setText(content, true);
                 mailSender.send(mimeMessage);
-
+                log.info("Verification email sent to {}", email);
             } catch (Exception e) {
+                log.error("Failed to send email to {}: {}", email, e.getMessage(), e);
                 System.err.println("Failed to send email: " + e.getMessage());
             }
         });

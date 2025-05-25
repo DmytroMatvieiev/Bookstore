@@ -1,4 +1,4 @@
-package org.dmdev.bookstore.mapper.impl;
+package org.dmdev.bookstore.repository.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.dmdev.bookstore.domain.BookGenre;

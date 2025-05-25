@@ -3,6 +3,7 @@ package org.dmdev.bookstore.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.dmdev.bookstore.domain.User;
 import org.dmdev.bookstore.exception.AuthException;
 import org.dmdev.bookstore.repository.UserRepository;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SecurityService {
@@ -65,18 +67,25 @@ public class SecurityService {
     }
 
     public Mono<TokenDetails> authenticate(final String username, final String password) {
+        log.info("Authentication attempt for username: {}", username);
         return userRepository.findByUsername(username)
                 .flatMap(user -> {
                     if (!user.isEnabled()) {
+                        log.warn("Authentication failed: account disabled for username {}", username);
                         return Mono.error(new AuthException("Account disabled", "ACCOUNT DISABLED"));
                     }
                     if (!passwordEncoder.matches(password, user.getPassword())) {
+                        log.warn("Authentication failed: bad credentials for username {}", username);
                         return Mono.error(new BadCredentialsException("Bad credentials"));
                     }
+                    log.info("Authentication successful for username {}", username);
                     return Mono.just(generateToken(user).toBuilder()
                             .id(user.getId())
                             .build());
                 })
-                .switchIfEmpty(Mono.error(new UsernameNotFoundException(username)));
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.warn("Authentication failed: user not found with username {}", username);
+                    return Mono.error(new UsernameNotFoundException(username));
+                }));
     }
 }
