@@ -25,10 +25,10 @@ public class BookController {
 
     @GetMapping
     Mono<ResponseModel> findAll(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return bookService.findAll(size, page);
+        return bookService.findAll(page, size);
     }
 
     @GetMapping("/byAuthor/{authorId}")

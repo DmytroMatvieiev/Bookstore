@@ -1,10 +1,8 @@
 package org.dmdev.bookstore.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.dmdev.bookstore.exception.AuthException;
 import org.dmdev.bookstore.exception.UnauthorizedException;
 import reactor.core.publisher.Mono;
