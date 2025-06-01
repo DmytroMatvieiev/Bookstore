@@ -4,35 +4,25 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "books")
-public class Book {
+@Table(name = "book_files")
+public class BookFile {
     @Id
     private UUID id;
-    @Column("isbn")
-    private String ISBN;
-    @Column("title")
-    private String title;
-    @Column("pages")
-    private int pages;
-    @Column("publication_date")
-    private LocalDate publicationDate;
-    @Column("author_id")
-    private UUID authorId;
-    @Transient
-    private List<Genre> genres;
-    @Transient
-    private List<BookFile> files;
+    @Column("book_id")
+    private UUID bookId;
+    private String format;
+    @Column("file_path")
+    private String filePath;
 }

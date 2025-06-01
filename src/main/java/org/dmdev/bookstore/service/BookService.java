@@ -2,19 +2,24 @@ package org.dmdev.bookstore.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dmdev.bookstore.domain.Genre;
 import org.dmdev.bookstore.dto.BookDTO;
 import org.dmdev.bookstore.domain.Book;
+import org.dmdev.bookstore.dto.BookFileDTO;
 import org.dmdev.bookstore.dto.GenreDTO;
+import org.dmdev.bookstore.mapper.BookFileMapper;
 import org.dmdev.bookstore.mapper.BookMapper;
 import org.dmdev.bookstore.model.ResponseModel;
 import org.dmdev.bookstore.repository.AuthorRepository;
+import org.dmdev.bookstore.repository.BookFileRepository;
 import org.dmdev.bookstore.repository.BookRepository;
 import org.dmdev.bookstore.repository.GenreRepository;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,9 +30,13 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
-    private final BookMapper mapper;
     private final GenreRepository genreRepository;
+    private final BookFileRepository bookFileRepository;
+    private final BookMapper mapper;
+    private final BookFileMapper bookFileMapper;
 
+
+    @Transactional
     public Mono<ResponseModel> save(BookDTO bookDTO) {
         if (bookDTO.id() != null) {
             log.warn("Attempted to save a book that already has an ID: {}", bookDTO.id());
@@ -42,22 +51,22 @@ public class BookService {
                     log.warn("Author with ID {} not found", bookDTO.authorId());
                     return Mono.error(new IllegalArgumentException("Author not found"));
                 }))
-                .flatMap(author -> {
-                    Book book = mapper.dtoToBook(bookDTO);
-                    return bookRepository.save(book)
-                            .doOnNext(saved -> log.info("Book '{}' saved with ID {}", saved.getTitle(), saved.getId()))
-                            .flatMap(savedBook -> {
-                                List<UUID> genreIds = bookDTO.genres().stream()
-                                        .map(GenreDTO::id)
-                                        .toList();
-                                return genreRepository.saveBookGenres(savedBook.getId(), genreIds)
-                                        .doOnSuccess(v -> log.info("Genres {} linked to book ID {}", genreIds, savedBook.getId()))
-                                        .thenReturn(ResponseModel.builder()
-                                                .status(ResponseModel.SUCCESS_STATUS)
-                                                .message("Book '%s' created".formatted(bookDTO.title()))
-                                                .build());
-                            });
-                })
+                .flatMap(author ->
+                        bookRepository.save(mapper.dtoToBook(bookDTO))
+                                .doOnNext(saved -> log.info("Book '{}' saved with ID {}", saved.getTitle(), saved.getId()))
+                                .flatMap(savedBook -> {
+                                    List<UUID> genreIds = bookDTO.genres().stream()
+                                            .map(GenreDTO::id)
+                                            .toList();
+                                    return genreRepository.saveBookGenres(savedBook.getId(), genreIds)
+                                            .doOnSuccess(v -> log.info("Genres {} linked to book ID {}", genreIds, savedBook.getId()))
+                                            .then(Mono.defer(() -> bookFileRepository.saveBookFiles(bookDTO.bookFiles().stream().map(bookFileMapper::toBookFile).toList())
+                                                    .doOnSuccess(v -> log.info("BookFiles linked to book ID {}", bookDTO.id()))
+                                                    .thenReturn(ResponseModel.builder()
+                                                            .status(ResponseModel.SUCCESS_STATUS)
+                                                            .message("Book '%s' created".formatted(bookDTO.title()))
+                                                            .build())));
+                                }))
                 .onErrorResume(ex -> {
                     log.error("Failed to save book '{}': {}", bookDTO.title(), ex.getMessage(), ex);
                     return Mono.just(ResponseModel.builder()
@@ -67,6 +76,29 @@ public class BookService {
                 });
     }
 
+/*    public Mono<ResponseModel> addBookFile(BookFileDTO bookFileDTO) {
+        log.info("Adding file for book: {}", bookFileDTO.bookId());
+        return bookRepository.findById(bookFileDTO.bookId())
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.warn("Book with ID {} not found", bookFileDTO.bookId());
+                    return Mono.error(new IllegalArgumentException("Book not found"));
+                }))
+                .flatMap(book -> bookFileRepository.save(bookFileMapper.toBookFile(bookFileDTO))
+                        .map(saved -> {
+                            log.info("Book file saved: {}", saved.getId());
+                            return ResponseModel.builder()
+                                    .status(ResponseModel.SUCCESS_STATUS)
+                                    .message("Book file added successfully")
+                                    .build();
+                        }))
+                .onErrorResume(e -> {
+                    log.error("Failed to add book file: {}", e.getMessage(), e);
+                    return Mono.just(ResponseModel.builder()
+                            .status(ResponseModel.FAIL_STATUS)
+                            .message("Error: " + e.getMessage())
+                            .build());
+                });
+    }*/
 
     public Mono<ResponseModel> delete(UUID id) {
         log.info("Attempting to delete book with ID {}", id);
@@ -180,14 +212,14 @@ public class BookService {
         return bookRepository.findById(id)
                 .flatMap(book -> {
                     log.info("Book found with id: {}", id);
-                    return genreRepository.findGenresByBookId(id)
-                            .collectList()
-                            .map(genres -> {
-                                log.info("Genres retrieved for book id {}: {}", id, genres.size());
+                    return Mono.zip(genreRepository.findGenresByBookId(id).collectList(),
+                                    bookFileRepository.findByBookId(id).collectList())
+                            .map(tuple -> {
+                                log.info("Genres: {}, Files: {}", tuple.getT1().size(), tuple.getT2().size());
                                 return ResponseModel.builder()
                                         .status(ResponseModel.SUCCESS_STATUS)
-                                        .message("Book with genres retrieved successfully")
-                                        .data(mapper.bookAndGenresToDto(book, genres))
+                                        .message("Book with genres and files retrieved successfully")
+                                        .data(mapper.bookDtoToSend(book, tuple.getT1(), tuple.getT2()))
                                         .build();
                             });
                 })
@@ -200,6 +232,25 @@ public class BookService {
                 }))
                 .onErrorResume(e -> {
                     log.error("Error retrieving book with id {}: {}", id, e.getMessage(), e);
+                    return Mono.just(ResponseModel.builder()
+                            .status(ResponseModel.FAIL_STATUS)
+                            .message("Error: " + e.getMessage())
+                            .build());
+                });
+    }
+
+    public Mono<ResponseModel> download(UUID bookFileId) {
+        return bookFileRepository.findById(bookFileId)
+                .flatMap(file -> {
+                    Resource resource = new FileSystemResource(Paths.get(file.getFilePath()).toFile());
+                    return Mono.just(ResponseModel.builder()
+                            .status(ResponseModel.SUCCESS_STATUS)
+                            .message("Downloading file")
+                            .data(resource)
+                            .build());
+                })
+                .onErrorResume(e -> {
+                    log.error("Error downloading bookFile with id {}: {}", bookFileId, e.getMessage(), e);
                     return Mono.just(ResponseModel.builder()
                             .status(ResponseModel.FAIL_STATUS)
                             .message("Error: " + e.getMessage())

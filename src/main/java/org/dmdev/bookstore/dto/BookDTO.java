@@ -14,5 +14,6 @@ public record BookDTO(UUID id,
                       LocalDate publishedDate,
                       int pages,
                       UUID authorId,
-                      List<GenreDTO> genres) {
+                      List<GenreDTO> genres,
+                      List<BookFileDTO> bookFiles) {
 }

@@ -1,7 +1,8 @@
-package org.dmdev.bookstore.repository.impl;
+package org.dmdev.bookstore.repository.custom.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.dmdev.bookstore.domain.BookGenre;
+import org.dmdev.bookstore.repository.custom.CustomGenreRepository;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;

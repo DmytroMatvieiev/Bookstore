@@ -1,4 +1,4 @@
-package org.dmdev.bookstore.repository.impl;
+package org.dmdev.bookstore.repository.custom;
 
 import reactor.core.publisher.Mono;
 

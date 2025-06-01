@@ -1,2 +1,8 @@
-package org.dmdev.bookstore.dto;public class UserRegisterDTO {
+package org.dmdev.bookstore.dto;
+
+public record UserRegisterDTO(
+        String username,
+        String password,
+        String email
+) {
 }

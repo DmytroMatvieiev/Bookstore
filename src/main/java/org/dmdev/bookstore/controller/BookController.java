@@ -41,6 +41,11 @@ public class BookController {
         return bookService.findById(id);
     }
 
+    @GetMapping("/download/{bookFileId}")
+    Mono<ResponseModel> download(@PathVariable UUID bookFileId){
+        return bookService.download(bookFileId);
+    }
+
     @GetMapping("/by-genres")
     public Mono<ResponseModel> findBooksByGenres(@RequestParam List<UUID> genreIds) {
         return bookService.findBooksByGenres(genreIds);

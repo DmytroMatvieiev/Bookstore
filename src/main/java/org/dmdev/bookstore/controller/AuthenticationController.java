@@ -5,6 +5,7 @@ import org.dmdev.bookstore.domain.User;
 import org.dmdev.bookstore.dto.AuthenticationRequestDTO;
 import org.dmdev.bookstore.dto.AuthenticationResponseDTO;
 import org.dmdev.bookstore.dto.UserDTO;
+import org.dmdev.bookstore.dto.UserRegisterDTO;
 import org.dmdev.bookstore.model.ResponseModel;
 
 import org.dmdev.bookstore.security.CustomPrincipal;
@@ -23,7 +24,7 @@ public class AuthenticationController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public Mono<ResponseModel> register(@RequestBody UserDTO userDTO) {
+    public Mono<ResponseModel> register(@RequestBody UserRegisterDTO userDTO) {
         return userService.register(userDTO);
     }
 

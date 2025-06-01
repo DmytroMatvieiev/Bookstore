@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dmdev.bookstore.domain.User;
 import org.dmdev.bookstore.domain.UserRole;
 import org.dmdev.bookstore.dto.UserDTO;
+import org.dmdev.bookstore.dto.UserRegisterDTO;
 import org.dmdev.bookstore.mapper.UserMapper;
 import org.dmdev.bookstore.model.ResponseModel;
 import org.dmdev.bookstore.repository.UserRepository;
@@ -26,15 +27,8 @@ public class UserService {
     private final EmailService emailService;
     private final EmailTokenUtil emailTokenUtil;
 
-    public Mono<ResponseModel> register(UserDTO userDTO) {
+    public Mono<ResponseModel> register(UserRegisterDTO userDTO) {
         log.info("Attempting to register user with email: {}", userDTO.email());
-        if (userDTO.id() != null) {
-            log.warn("Registration failed: User {} already has an ID", userDTO.username());
-            return Mono.just(ResponseModel.builder()
-                    .status(ResponseModel.FAIL_STATUS)
-                    .message(String.format("User %s exist", userDTO.username()))
-                    .build());
-        }
         return userRepository.findByEmail(userDTO.email())
                 .flatMap(existingUser -> {
                     log.info("User with email {} already exists", userDTO.email());
@@ -53,8 +47,9 @@ public class UserService {
                     }
                 })
                 .switchIfEmpty(Mono.defer(() -> {
-                    User user = mapper.dtoToUser(userDTO);
+                    User user = mapper.toRegisterUser(userDTO);
                     user.setVerificationToken(emailTokenUtil.generateToken(user.getEmail()));
+                    user.setRole(UserRole.ROLE_USER);
                     log.info("Registering new user: {}", userDTO.username());
                     return userRepository.save(user)
                             .flatMap(savedUser -> {
