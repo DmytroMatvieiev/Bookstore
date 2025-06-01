@@ -47,7 +47,17 @@ public class BookController {
     }
 
     @GetMapping("/by-genres")
-    public Mono<ResponseModel> findBooksByGenres(@RequestParam List<UUID> genreIds) {
+    Mono<ResponseModel> findBooksByGenres(@RequestParam List<UUID> genreIds) {
         return bookService.findBooksByGenres(genreIds);
+    }
+
+    @DeleteMapping("/{id}")
+    Mono<ResponseModel> delete(@PathVariable UUID id) {
+        return bookService.delete(id);
+    }
+
+    @PutMapping
+    Mono<ResponseModel> update(@RequestBody BookDTO bookDTO) {
+        return bookService.update(bookDTO);
     }
 }

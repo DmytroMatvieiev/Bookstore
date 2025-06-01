@@ -2,6 +2,7 @@ package org.dmdev.bookstore.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dmdev.bookstore.dto.GenreDTO;
 import org.dmdev.bookstore.mapper.GenreMapper;
 import org.dmdev.bookstore.model.ResponseModel;
 import org.dmdev.bookstore.repository.GenreRepository;
@@ -17,6 +18,32 @@ public class GenreService {
 
     private final GenreRepository genreRepository;
     private final GenreMapper genreMapper;
+
+    public Mono<ResponseModel> save(GenreDTO genreDTO) {
+        log.info("Saving genre: {}", genreDTO);
+        if (genreDTO.id() != null) {
+            log.warn("Attempt to save genre with existing ID: {}", genreDTO.id());
+            return Mono.just(ResponseModel.builder()
+                    .status(ResponseModel.FAIL_STATUS)
+                    .message("Genre already exists")
+                    .build());
+        }
+        return genreRepository.save(genreMapper.dtoToGenre(genreDTO))
+                .map(savedGenre -> {
+                    log.info("Genre saved with ID: {}", savedGenre.getId());
+                    return ResponseModel.builder()
+                            .status(ResponseModel.SUCCESS_STATUS)
+                            .message("Genre saved successfully")
+                            .build();
+                })
+                .onErrorResume(e -> {
+                    log.error("Error saving genre: {}", e.getMessage(), e);
+                    return Mono.just(ResponseModel.builder()
+                            .status(ResponseModel.FAIL_STATUS)
+                            .message("Error saving genre")
+                            .build());
+                });
+    }
 
     public Mono<ResponseModel> findAllGenres() {
         log.info("Fetching all genres...");
@@ -63,6 +90,66 @@ public class GenreService {
                     return Mono.just(ResponseModel.builder()
                             .status(ResponseModel.FAIL_STATUS)
                             .message("Error retrieving genres for book")
+                            .build());
+                });
+    }
+
+    public Mono<ResponseModel> delete(UUID genreId) {
+        log.info("Deleting genre with ID: {}", genreId);
+        return genreRepository.findById(genreId)
+                .flatMap(genre -> genreRepository.delete(genre)
+                        .thenReturn(ResponseModel.builder()
+                                .status(ResponseModel.SUCCESS_STATUS)
+                                .message("Genre deleted successfully")
+                                .build())
+                )
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.warn("Genre not found with ID: {}", genreId);
+                    return Mono.just(ResponseModel.builder()
+                            .status(ResponseModel.FAIL_STATUS)
+                            .message("Genre not found")
+                            .build());
+                }))
+                .onErrorResume(e -> {
+                    log.error("Error deleting genre with ID {}: {}", genreId, e.getMessage(), e);
+                    return Mono.just(ResponseModel.builder()
+                            .status(ResponseModel.FAIL_STATUS)
+                            .message("Error deleting genre")
+                            .build());
+                });
+    }
+
+    public Mono<ResponseModel> update(GenreDTO genreDTO) {
+        log.info("Updating genre: {}", genreDTO);
+        if (genreDTO.id() == null) {
+            log.warn("Genre ID is null");
+            return Mono.just(ResponseModel.builder()
+                    .status(ResponseModel.FAIL_STATUS)
+                    .message("Genre ID must not be null")
+                    .build());
+        }
+        return genreRepository.findById(genreDTO.id())
+                .flatMap(existingGenre -> genreRepository.save(genreMapper.dtoToGenre(genreDTO))
+                        .map(saved -> {
+                            log.info("Genre updated successfully: {}", saved.getId());
+                            return ResponseModel.builder()
+                                    .status(ResponseModel.SUCCESS_STATUS)
+                                    .message("Genre updated successfully")
+                                    .build();
+                        })
+                )
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.warn("Genre not found with ID: {}", genreDTO.id());
+                    return Mono.just(ResponseModel.builder()
+                            .status(ResponseModel.FAIL_STATUS)
+                            .message("Genre not found")
+                            .build());
+                }))
+                .onErrorResume(e -> {
+                    log.error("Error updating genre {}: {}", genreDTO.id(), e.getMessage(), e);
+                    return Mono.just(ResponseModel.builder()
+                            .status(ResponseModel.FAIL_STATUS)
+                            .message("Error: " + e.getMessage())
                             .build());
                 });
     }

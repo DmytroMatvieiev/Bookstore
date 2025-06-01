@@ -168,7 +168,6 @@ public class BookService {
                 });
     }
 
-
     public Mono<ResponseModel> findBooksByGenres(List<UUID> genreIds) {
         if (genreIds == null || genreIds.isEmpty()) {
             log.warn("findBooksByGenres called with empty or null genreIds");
@@ -205,7 +204,6 @@ public class BookService {
                             .build());
                 });
     }
-
 
     public Mono<ResponseModel> findById(UUID id) {
         log.info("Finding book by id: {}", id);
@@ -258,4 +256,45 @@ public class BookService {
                 });
     }
 
+    public Mono<ResponseModel> update(BookDTO bookDTO) {
+        log.info("Updating book: {}", bookDTO);
+        if (bookDTO.id() == null) {
+            log.warn("Book ID is null");
+            return Mono.just(ResponseModel.builder()
+                    .status(ResponseModel.FAIL_STATUS)
+                    .message("Book ID must not be null")
+                    .build());
+        }
+        return bookRepository.findById(bookDTO.id())
+                .flatMap(book -> {
+                    log.info("Book found: {}", book.getId());
+                    return bookRepository.save(mapper.dtoToBook(bookDTO))
+                            .flatMap(savedBook -> {
+                                // Update genres
+                                List<UUID> genreIds = bookDTO.genres().stream()
+                                        .map(GenreDTO::id)
+                                        .toList();
+                                return genreRepository.saveBookGenres(savedBook.getId(), genreIds)
+                                        .thenReturn(ResponseModel.builder()
+                                                .status(ResponseModel.SUCCESS_STATUS)
+                                                .message("Book updated successfully")
+                                                .data(mapper.bookToDto(savedBook))
+                                                .build());
+                            });
+                })
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.warn("Book not found with ID: {}", bookDTO.id());
+                    return Mono.just(ResponseModel.builder()
+                            .status(ResponseModel.FAIL_STATUS)
+                            .message("Book not found")
+                            .build());
+                }))
+                .onErrorResume(e -> {
+                    log.error("Error updating book: {}", e.getMessage(), e);
+                    return Mono.just(ResponseModel.builder()
+                            .status(ResponseModel.FAIL_STATUS)
+                            .message("Error: " + e.getMessage())
+                            .build());
+                });
+    }
 }
