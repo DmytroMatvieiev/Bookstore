@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-@Builder
+@Builder(toBuilder = true)
 public record AuthorDTO(UUID id,
                         String firstName,
                         String lastName,

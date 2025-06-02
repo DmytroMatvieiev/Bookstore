@@ -48,7 +48,7 @@ public class GenreService {
     public Mono<ResponseModel> findAllGenres() {
         log.info("Fetching all genres...");
         return genreRepository.findAll()
-                .doOnNext(genreMapper::genreToDto)
+                .map(genreMapper::genreToDto)
                 .collectList()
                 .doOnSuccess(list -> log.info("Successfully retrieved {} genres", list.size()))
                 .map(genres -> ResponseModel.builder()
