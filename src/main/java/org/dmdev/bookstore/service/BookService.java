@@ -60,7 +60,10 @@ public class BookService {
                                             .toList();
                                     return genreRepository.saveBookGenres(savedBook.getId(), genreIds)
                                             .doOnSuccess(v -> log.info("Genres {} linked to book ID {}", genreIds, savedBook.getId()))
-                                            .then(Mono.defer(() -> bookFileRepository.saveBookFiles(bookDTO.bookFiles().stream().map(bookFileMapper::toBookFile).toList())
+                                            .then(Mono.defer(() -> bookFileRepository.saveBookFiles(bookDTO.bookFiles()
+                                                            .stream()
+                                                            .map(bookFileMapper::toBookFile)
+                                                            .toList())
                                                     .doOnSuccess(v -> log.info("BookFiles linked to book ID {}", bookDTO.id()))
                                                     .thenReturn(ResponseModel.builder()
                                                             .status(ResponseModel.SUCCESS_STATUS)
