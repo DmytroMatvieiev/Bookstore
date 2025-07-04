@@ -2,6 +2,7 @@ package org.dmdev.bookstore.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dmdev.bookstore.domain.BookFile;
 import org.dmdev.bookstore.dto.BookDTO;
 import org.dmdev.bookstore.domain.Book;
 import org.dmdev.bookstore.dto.BookFileDTO;
@@ -36,7 +37,7 @@ public class BookService {
     private final BookFileMapper bookFileMapper;
 
 
-    @Transactional
+
     public Mono<ResponseModel> save(BookDTO bookDTO) {
         if (bookDTO.id() != null) {
             log.warn("Attempted to save a book that already has an ID: {}", bookDTO.id());
@@ -62,9 +63,13 @@ public class BookService {
                                             .doOnSuccess(v -> log.info("Genres {} linked to book ID {}", genreIds, savedBook.getId()))
                                             .then(Mono.defer(() -> bookFileRepository.saveBookFiles(bookDTO.bookFiles()
                                                             .stream()
-                                                            .map(bookFileMapper::toBookFile)
+                                                            .map(dtos -> {
+                                                                BookFile file = bookFileMapper.toBookFile(dtos);
+                                                                file.setBookId(savedBook.getId());
+                                                                return file;
+                                                            })
                                                             .toList())
-                                                    .doOnSuccess(v -> log.info("BookFiles linked to book ID {}", bookDTO.id()))
+                                                    .doOnSuccess(v -> log.info("BookFiles linked to book ID {}", savedBook.getId()))
                                                     .thenReturn(ResponseModel.builder()
                                                             .status(ResponseModel.SUCCESS_STATUS)
                                                             .message("Book '%s' created".formatted(bookDTO.title()))

@@ -27,12 +27,12 @@ public class AuthorController {
         return authorService.find(id);
     }
 
-    @PutMapping
+    @PostMapping
     Mono<ResponseModel> save(@RequestBody AuthorDTO authorDTO) {
         return authorService.save(authorDTO);
     }
 
-    @PostMapping
+    @PutMapping
     Mono<ResponseModel> update(@RequestBody AuthorDTO authorDTO) {
         return authorService.update(authorDTO);
     }
